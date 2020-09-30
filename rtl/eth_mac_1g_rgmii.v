@@ -31,6 +31,7 @@ THE SOFTWARE.
  */
 module eth_mac_1g_rgmii #
 (
+    parameter integer DEVICE_TYPE = 0, // 0 for 7Series, 2 for Ultrascale+
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // IODDR style ("IODDR", "IODDR2")
@@ -180,6 +181,7 @@ end
 assign speed = speed_reg;
 
 rgmii_phy_if #(
+    .DEVICE_TYPE(DEVICE_TYPE),
     .TARGET(TARGET),
     .IODDR_STYLE(IODDR_STYLE),
     .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),

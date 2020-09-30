@@ -31,6 +31,7 @@ THE SOFTWARE.
  */
 module eth_mac_1g_rgmii_fifo #
 (
+    parameter integer DEVICE_TYPE = 0, // 0 for 7Series, 2 for Ultrascale+
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // IODDR style ("IODDR", "IODDR2")
@@ -53,7 +54,8 @@ module eth_mac_1g_rgmii_fifo #
     parameter RX_FIFO_ADDR_WIDTH = 12,
     parameter RX_FRAME_FIFO = 1,
     parameter RX_DROP_BAD_FRAME = RX_FRAME_FIFO,
-    parameter RX_DROP_WHEN_FULL = RX_FRAME_FIFO
+    parameter RX_DROP_WHEN_FULL = RX_FRAME_FIFO,
+    parameter EXTERNAL_RX_FIFO = 0
 )
 (
     input  wire        gtx_clk,
@@ -107,7 +109,23 @@ module eth_mac_1g_rgmii_fifo #
     /*
      * Configuration
      */
-    input  wire [7:0]  ifg_delay
+    input  wire [7:0]  ifg_delay,
+
+    // External RX FIFO Interfaces
+    output wire        ext_rx_fifo_clk,
+    output reg         ext_rx_fifo_rst,
+
+    output wire [7:0]  ext_rx_fifo_out_tdata,
+    output wire        ext_rx_fifo_out_tvalid,
+    input  wire        ext_rx_fifo_out_tready,
+    output wire        ext_rx_fifo_out_tlast,
+    output wire        ext_rx_fifo_out_tuser,
+
+    input  wire [7:0]  ext_rx_fifo_in_tdata,
+    input  wire        ext_rx_fifo_in_tvalid,
+    output wire        ext_rx_fifo_in_tready,
+    input  wire        ext_rx_fifo_in_tlast,
+    input  wire        ext_rx_fifo_in_tuser
 );
 
 wire tx_clk;
@@ -199,7 +217,10 @@ always @(posedge logic_clk) begin
     speed_sync_reg_2 <= speed_sync_reg_1;
 end
 
+wire logic_rst_rx_clk;
+
 eth_mac_1g_rgmii #(
+    .DEVICE_TYPE(DEVICE_TYPE),
     .TARGET(TARGET),
     .IODDR_STYLE(IODDR_STYLE),
     .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
@@ -284,51 +305,122 @@ tx_fifo (
     .m_status_good_frame()
 );
 
-axis_async_fifo #(
-    .ADDR_WIDTH(RX_FIFO_ADDR_WIDTH),
-    .DATA_WIDTH(8),
-    .KEEP_ENABLE(0),
-    .LAST_ENABLE(1),
-    .ID_ENABLE(0),
-    .DEST_ENABLE(0),
-    .USER_ENABLE(1),
-    .USER_WIDTH(1),
-    .FRAME_FIFO(TX_FRAME_FIFO),
-    .USER_BAD_FRAME_VALUE(1'b1),
-    .USER_BAD_FRAME_MASK(1'b1),
-    .DROP_BAD_FRAME(TX_DROP_BAD_FRAME),
-    .DROP_WHEN_FULL(TX_DROP_WHEN_FULL)
-)
-rx_fifo (
-    // Common reset
-    .async_rst(rx_rst | logic_rst),
-    // AXI input
-    .s_clk(rx_clk),
-    .s_axis_tdata(rx_fifo_axis_tdata),
-    .s_axis_tkeep(0),
-    .s_axis_tvalid(rx_fifo_axis_tvalid),
-    .s_axis_tready(),
-    .s_axis_tlast(rx_fifo_axis_tlast),
-    .s_axis_tid(0),
-    .s_axis_tdest(0),
-    .s_axis_tuser(rx_fifo_axis_tuser),
-    // AXI output
-    .m_clk(logic_clk),
-    .m_axis_tdata(rx_axis_tdata),
-    .m_axis_tkeep(),
-    .m_axis_tvalid(rx_axis_tvalid),
-    .m_axis_tready(rx_axis_tready),
-    .m_axis_tlast(rx_axis_tlast),
-    .m_axis_tid(),
-    .m_axis_tdest(),
-    .m_axis_tuser(rx_axis_tuser),
-    // Status
-    .s_status_overflow(),
-    .s_status_bad_frame(),
-    .s_status_good_frame(),
-    .m_status_overflow(rx_fifo_overflow),
-    .m_status_bad_frame(rx_fifo_bad_frame),
-    .m_status_good_frame(rx_fifo_good_frame)
-);
+generate
+    if (EXTERNAL_RX_FIFO) begin
+        assign ext_rx_fifo_clk = rx_clk;
+
+        xclock_rst #(
+            .FF_CASCADE(2)
+        ) xclock_logic_rst_rx_clk (
+            .tx_clk (logic_clk       ),
+            .rst_in (logic_rst       ),
+            .rx_clk (rx_clk          ),
+            .rst_out(logic_rst_rx_clk)
+        );
+
+        always @(posedge rx_clk) begin
+            ext_rx_fifo_rst <= rx_rst | logic_rst_rx_clk;
+        end
+
+        assign ext_rx_fifo_out_tdata  = rx_fifo_axis_tdata;
+        assign ext_rx_fifo_out_tvalid = rx_fifo_axis_tvalid;
+        assign ext_rx_fifo_out_tlast  = rx_fifo_axis_tlast;
+        assign ext_rx_fifo_out_tuser  = rx_fifo_axis_tuser;
+
+        axis_async_fifo #(
+            .ADDR_WIDTH          (RX_FIFO_ADDR_WIDTH),
+            .DATA_WIDTH          (8                 ),
+            .KEEP_ENABLE         (0                 ),
+            .LAST_ENABLE         (1                 ),
+            .ID_ENABLE           (0                 ),
+            .DEST_ENABLE         (0                 ),
+            .USER_ENABLE         (1                 ),
+            .USER_WIDTH          (1                 ),
+            .FRAME_FIFO          (TX_FRAME_FIFO     ),
+            .USER_BAD_FRAME_VALUE(1'b1              ),
+            .USER_BAD_FRAME_MASK (1'b1              ),
+            .DROP_BAD_FRAME      (1'b0              ),
+            .DROP_WHEN_FULL      (1'b0              )
+        ) rx_fifo (
+            // Common reset
+            .async_rst          (rx_rst | logic_rst   ),
+            // AXI input
+            .s_clk              (rx_clk               ),
+            .s_axis_tdata       (ext_rx_fifo_in_tdata ),
+            .s_axis_tkeep       (0                    ),
+            .s_axis_tvalid      (ext_rx_fifo_in_tvalid),
+            .s_axis_tready      (ext_rx_fifo_in_tready),
+            .s_axis_tlast       (ext_rx_fifo_in_tlast ),
+            .s_axis_tid         (0                    ),
+            .s_axis_tdest       (0                    ),
+            .s_axis_tuser       (ext_rx_fifo_in_tuser ),
+            // AXI output
+            .m_clk              (logic_clk            ),
+            .m_axis_tdata       (rx_axis_tdata        ),
+            .m_axis_tkeep       (                     ),
+            .m_axis_tvalid      (rx_axis_tvalid       ),
+            .m_axis_tready      (rx_axis_tready       ),
+            .m_axis_tlast       (rx_axis_tlast        ),
+            .m_axis_tid         (                     ),
+            .m_axis_tdest       (                     ),
+            .m_axis_tuser       (rx_axis_tuser        ),
+            // Status
+            .s_status_overflow  (                     ),
+            .s_status_bad_frame (                     ),
+            .s_status_good_frame(                     ),
+            .m_status_overflow  (rx_fifo_overflow     ),
+            .m_status_bad_frame (rx_fifo_bad_frame    ),
+            .m_status_good_frame(rx_fifo_good_frame   )
+        );
+    end else begin 
+        axis_async_fifo #(
+            .ADDR_WIDTH          (RX_FIFO_ADDR_WIDTH),
+            .DATA_WIDTH          (8                 ),
+            .KEEP_ENABLE         (0                 ),
+            .LAST_ENABLE         (1                 ),
+            .ID_ENABLE           (0                 ),
+            .DEST_ENABLE         (0                 ),
+            .USER_ENABLE         (1                 ),
+            .USER_WIDTH          (1                 ),
+            .FRAME_FIFO          (TX_FRAME_FIFO     ),
+            .USER_BAD_FRAME_VALUE(1'b1              ),
+            .USER_BAD_FRAME_MASK (1'b1              ),
+            .DROP_BAD_FRAME      (TX_DROP_BAD_FRAME ),
+            .DROP_WHEN_FULL      (TX_DROP_WHEN_FULL )
+        ) rx_fifo (
+            // Common reset
+            .async_rst          (rx_rst | logic_rst ),
+            // AXI input
+            .s_clk              (rx_clk             ),
+            .s_axis_tdata       (rx_fifo_axis_tdata ),
+            .s_axis_tkeep       (0                  ),
+            .s_axis_tvalid      (rx_fifo_axis_tvalid),
+            .s_axis_tready      (                   ),
+            .s_axis_tlast       (rx_fifo_axis_tlast ),
+            .s_axis_tid         (0                  ),
+            .s_axis_tdest       (0                  ),
+            .s_axis_tuser       (rx_fifo_axis_tuser ),
+            // AXI output
+            .m_clk              (logic_clk          ),
+            .m_axis_tdata       (rx_axis_tdata      ),
+            .m_axis_tkeep       (                   ),
+            .m_axis_tvalid      (rx_axis_tvalid     ),
+            .m_axis_tready      (rx_axis_tready     ),
+            .m_axis_tlast       (rx_axis_tlast      ),
+            .m_axis_tid         (                   ),
+            .m_axis_tdest       (                   ),
+            .m_axis_tuser       (rx_axis_tuser      ),
+            // Status
+            .s_status_overflow  (                   ),
+            .s_status_bad_frame (                   ),
+            .s_status_good_frame(                   ),
+            .m_status_overflow  (rx_fifo_overflow   ),
+            .m_status_bad_frame (rx_fifo_bad_frame  ),
+            .m_status_good_frame(rx_fifo_good_frame )
+        );
+    end
+endgenerate
+
+
 
 endmodule
