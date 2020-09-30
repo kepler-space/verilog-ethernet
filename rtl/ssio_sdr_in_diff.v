@@ -99,7 +99,7 @@ endgenerate
 
 ssio_sdr_in #(
     .TARGET(TARGET),
-    .IODDR_STYLE(IODDR_STYLE),
+//  .IODDR_STYLE(IODDR_STYLE),  KEPLER MODIFICATION (this parameter doesn't exist)
     .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
     .WIDTH(WIDTH)
 )

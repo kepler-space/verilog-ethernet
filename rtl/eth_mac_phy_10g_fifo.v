@@ -155,6 +155,10 @@ end
 wire rx_error_bad_frame_int;
 wire rx_error_bad_fcs_int;
 
+// KEPLER ADDITION START
+wire rx_high_ber_int, rx_block_lock_int;
+// KEPLER ADDITION END
+
 reg [3:0] rx_sync_reg_1 = 4'd0;
 reg [3:0] rx_sync_reg_2 = 4'd0;
 reg [3:0] rx_sync_reg_3 = 4'd0;
