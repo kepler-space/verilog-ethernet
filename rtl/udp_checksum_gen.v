@@ -233,7 +233,8 @@ payload_fifo (
     // Status
     .status_overflow(),
     .status_bad_frame(),
-    .status_good_frame()
+    .status_good_frame(),
+    .reset_read_ptr(1'b0)
 );
 
 assign s_udp_payload_fifo_tdata = s_udp_payload_axis_tdata;
