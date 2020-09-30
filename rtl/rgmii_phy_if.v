@@ -31,6 +31,7 @@ THE SOFTWARE.
  */
 module rgmii_phy_if #
 (
+    parameter integer DEVICE_TYPE = 0, // 0 for 7Series, 2 for Ultrascale+
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // IODDR style ("IODDR", "IODDR2")
@@ -86,20 +87,39 @@ module rgmii_phy_if #
 wire rgmii_rx_ctl_1;
 wire rgmii_rx_ctl_2;
 
-ssio_ddr_in #
-(
-    .TARGET(TARGET),
-    .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
-    .IODDR_STYLE(IODDR_STYLE),
-    .WIDTH(5)
-)
-rx_ssio_ddr_inst (
-    .input_clk(phy_rgmii_rx_clk),
-    .input_d({phy_rgmii_rxd, phy_rgmii_rx_ctl}),
-    .output_clk(mac_gmii_rx_clk),
-    .output_q1({mac_gmii_rxd[3:0], rgmii_rx_ctl_1}),
-    .output_q2({mac_gmii_rxd[7:4], rgmii_rx_ctl_2})
-);
+generate
+    // We need to use some hacks if DEVICE_TYPE is 2
+    if(DEVICE_TYPE == 2) begin
+        // We remove the BUFG since we use a non-clock capable pin for phy_rgmii_rx_clk
+        ssio_ddr_in_nobufg #(
+            .TARGET           (TARGET           ),
+            .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
+            .IODDR_STYLE      (IODDR_STYLE      ),
+            .WIDTH            (5                )
+        ) rx_ssio_ddr_inst (
+            .input_clk (phy_rgmii_rx_clk                   ),
+            .input_d   ({phy_rgmii_rxd, phy_rgmii_rx_ctl}  ),
+            .output_clk(mac_gmii_rx_clk                    ),
+            .output_q1 ({mac_gmii_rxd[3:0], rgmii_rx_ctl_1}),
+            .output_q2 ({mac_gmii_rxd[7:4], rgmii_rx_ctl_2})
+        );
+    end else begin
+        ssio_ddr_in #(
+            .TARGET           (TARGET           ),
+            .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
+            .IODDR_STYLE      (IODDR_STYLE      ),
+            .WIDTH            (5                )
+        ) rx_ssio_ddr_inst (
+            .input_clk (phy_rgmii_rx_clk                   ),
+            .input_d   ({phy_rgmii_rxd, phy_rgmii_rx_ctl}  ),
+            .output_clk(mac_gmii_rx_clk                    ),
+            .output_q1 ({mac_gmii_rxd[3:0], rgmii_rx_ctl_1}),
+            .output_q2 ({mac_gmii_rxd[7:4], rgmii_rx_ctl_2})
+        );
+    end
+
+endgenerate
+
 
 assign mac_gmii_rx_dv = rgmii_rx_ctl_1;
 assign mac_gmii_rx_er = rgmii_rx_ctl_1 ^ rgmii_rx_ctl_2;

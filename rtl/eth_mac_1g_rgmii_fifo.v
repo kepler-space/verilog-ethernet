@@ -31,6 +31,7 @@ THE SOFTWARE.
  */
 module eth_mac_1g_rgmii_fifo #
 (
+    parameter integer DEVICE_TYPE = 0, // 0 for 7Series, 2 for Ultrascale+
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // IODDR style ("IODDR", "IODDR2")
@@ -206,7 +207,10 @@ always @(posedge logic_clk) begin
     speed_sync_reg_2 <= speed_sync_reg_1;
 end
 
+wire logic_rst_rx_clk;
+
 eth_mac_1g_rgmii #(
+    .DEVICE_TYPE(DEVICE_TYPE),
     .TARGET(TARGET),
     .IODDR_STYLE(IODDR_STYLE),
     .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
