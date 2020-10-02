@@ -33,6 +33,8 @@ module axis_frame_length_adjust #
 (
     // Width of AXI stream interfaces in bits
     parameter DATA_WIDTH = 8,
+    // Width of frame length fields
+    parameter ADDR_WIDTH = 16,
     // Propagate tkeep signal
     // If disabled, tkeep assumed to be 1'b1
     parameter KEEP_ENABLE = (DATA_WIDTH>8),
@@ -86,14 +88,14 @@ module axis_frame_length_adjust #
     input  wire                   status_ready,
     output wire                   status_frame_pad,
     output wire                   status_frame_truncate,
-    output wire [15:0]            status_frame_length,
-    output wire [15:0]            status_frame_original_length,
+    output wire [ADDR_WIDTH-1:0]  status_frame_length,
+    output wire [ADDR_WIDTH-1:0]  status_frame_original_length,
 
     /*
      * Configuration
      */
-    input  wire [15:0]            length_min,
-    input  wire [15:0]            length_max
+    input  wire [ADDR_WIDTH-1:0]  length_min,
+    input  wire [ADDR_WIDTH-1:0]  length_max
 );
 
 // bus word width
@@ -119,13 +121,13 @@ reg [2:0] state_reg = STATE_IDLE, state_next;
 // datapath control signals
 reg store_last_word;
 
-reg [15:0] frame_ptr_reg = 16'd0, frame_ptr_next;
+reg [ADDR_WIDTH-1:0] frame_ptr_reg = 16'd0, frame_ptr_next;
 
 reg [DATA_WIDTH-1:0] s_axis_tdata_masked;
 
 // frame length counters
-reg [15:0] short_counter_reg = 16'd0, short_counter_next = 16'd0;
-reg [15:0] long_counter_reg = 16'd0, long_counter_next = 16'd0;
+reg [ADDR_WIDTH-1:0] short_counter_reg = 16'd0, short_counter_next = 16'd0;
+reg [ADDR_WIDTH-1:0] long_counter_reg = 16'd0, long_counter_next = 16'd0;
 
 reg [DATA_WIDTH-1:0] last_word_data_reg = {DATA_WIDTH{1'b0}};
 reg [KEEP_WIDTH-1:0] last_word_keep_reg = {KEEP_WIDTH{1'b0}};
@@ -136,8 +138,8 @@ reg [USER_WIDTH-1:0] last_word_user_reg = {USER_WIDTH{1'b0}};
 reg status_valid_reg = 1'b0, status_valid_next;
 reg status_frame_pad_reg = 1'b0, status_frame_pad_next;
 reg status_frame_truncate_reg = 1'b0, status_frame_truncate_next;
-reg [15:0] status_frame_length_reg = 16'd0, status_frame_length_next;
-reg [15:0] status_frame_original_length_reg = 16'd0, status_frame_original_length_next;
+reg [ADDR_WIDTH-1:0] status_frame_length_reg = 16'd0, status_frame_length_next;
+reg [ADDR_WIDTH-1:0] status_frame_original_length_reg = 16'd0, status_frame_original_length_next;
 
 // internal datapath
 reg  [DATA_WIDTH-1:0] m_axis_tdata_int;
