@@ -107,7 +107,16 @@ module axis_fifo #
      */
     output wire                   status_overflow,
     output wire                   status_bad_frame,
-    output wire                   status_good_frame
+    output wire                   status_good_frame,
+
+    // To reset the read pointer to 0 (should be tied off to 0 if unused).
+    // This can be used to store data in the FIFO and then replay it several
+    // times, so long as the data began at address 0 (typically this means
+    // that the module is reset immediately before each packet), and no data
+    // is written to the FIFO after the first capture. Note that if data is
+    // written to the FIFO during the replay, it can also loop around and
+    // overwrite the values at the beginning of the FIFO.
+    input wire                    reset_read_ptr
 );
 
 parameter ADDR_WIDTH = (KEEP_ENABLE && KEEP_WIDTH > 1) ? $clog2(DEPTH/KEEP_WIDTH) : $clog2(DEPTH);
@@ -275,6 +284,10 @@ always @(posedge clk) begin
             m_axis_tvalid_pipe_reg[0] <= 1'b1;
             rd_ptr_reg <= rd_ptr_reg + 1;
         end
+    end
+
+    if (reset_read_ptr) begin
+        rd_ptr_reg <= {ADDR_WIDTH+1{1'b0}};
     end
 
     if (rst) begin
