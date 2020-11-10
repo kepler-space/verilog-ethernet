@@ -85,4 +85,12 @@ foreach fifo_inst [get_cells -hier -filter {(ORIG_REF_NAME == axis_async_fifo ||
             set_max_delay -from [get_cells $fifo_inst/${i}_sync1_reg_reg] -to [get_cells $fifo_inst/${i}_sync2_reg_reg] -datapath_only $read_clk_period
         }
     }
+
+    # CDC-6 warning is not applicable since this bus is Gray coded
+    create_waiver -type CDC -id {CDC-6} -user "axis_async_fifo"\
+    -desc "The CDC-6 warning is waived for the read pointer in axis_async_fifo, since it is Gray coded." \
+    -from [get_cells "$fifo_inst/rd_ptr_reg_reg[*] $fifo_inst/rd_ptr_gray_reg_reg[*]"] -to [get_cells $fifo_inst/rd_ptr_gray_sync1_reg_reg[*]]
+    create_waiver -type CDC -id {CDC-6} -user "axis_async_fifo"\
+    -desc "The CDC-6 warning is waived for the write pointer in axis_async_fifo, since it is Gray coded." \
+    -from [get_cells -quiet "$fifo_inst/wr_ptr_reg_reg[*] $fifo_inst/wr_ptr_gray_reg_reg[*] $fifo_inst/wr_ptr_sync_gray_reg_reg[*]"] -to [get_cells $fifo_inst/wr_ptr_gray_sync1_reg_reg[*]] -datapath_only $write_clk_period
 }
