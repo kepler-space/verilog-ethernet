@@ -20,7 +20,7 @@
 
 # AXI stream asynchronous FIFO timing constraints
 
-foreach fifo_inst [get_cells -hier -filter {(ORIG_REF_NAME == axis_async_fifo || REF_NAME == axis_async_fifo)}] {
+foreach fifo_inst [get_cells -quiet -hier -filter {(ORIG_REF_NAME == axis_async_fifo || REF_NAME == axis_async_fifo)}] {
     puts "Inserting timing constraints for axis_async_fifo instance $fifo_inst"
 
     # get clock periods
