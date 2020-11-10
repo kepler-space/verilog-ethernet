@@ -20,7 +20,7 @@
 
 # RGMII Gigabit Ethernet MAC timing constraints
 
-foreach mac_inst [get_cells -hier -filter {(ORIG_REF_NAME == eth_mac_1g_rgmii || REF_NAME == eth_mac_1g_rgmii)}] {
+foreach mac_inst [get_cells -quiet -hier -filter {(ORIG_REF_NAME == eth_mac_1g_rgmii || REF_NAME == eth_mac_1g_rgmii)}] {
     puts "Inserting timing constraints for eth_mac_1g_rgmii instance $mac_inst"
 
     set select_ffs [get_cells -hier -regexp ".*/tx_mii_select_sync_reg\\\[\\d\\\]" -filter "PARENT == $mac_inst"]

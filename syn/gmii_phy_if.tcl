@@ -20,7 +20,7 @@
 
 # GMII PHY IF timing constraints
 
-foreach if_inst [get_cells -hier -filter {(ORIG_REF_NAME == gmii_phy_if || REF_NAME == gmii_phy_if)}] {
+foreach if_inst [get_cells -quiet -hier -filter {(ORIG_REF_NAME == gmii_phy_if || REF_NAME == gmii_phy_if)}] {
     puts "Inserting timing constraints for gmii_phy_if instance $if_inst"
 
     # reset synchronization
