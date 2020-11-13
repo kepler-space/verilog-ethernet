@@ -10,7 +10,7 @@
 # uncomment to use --squash
 #squash="yes"
 # Remote repository
-repo="git@github.com:alexforencich/verilog-axis.git"
+repo="http://github.com/kepler-space/verilog-axis.git"
 # Remote name
 remote="axis"
 # Subdirectory to store code in
@@ -18,7 +18,7 @@ remote="axis"
 #subdir="axis"
 rel_subdir="axis"
 # Remote branch
-branch="master"
+branch="kepler_changes"
 # Backport branch name (only used for pushing)
 backportbranch="${remote}backport"
 # Add commit message
