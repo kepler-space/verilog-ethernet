@@ -20,7 +20,7 @@
 
 # reset synchronizer timing constraints
 
-foreach inst [get_cells -hier -filter {(ORIG_REF_NAME == sync_reset || REF_NAME == sync_reset)}] {
+foreach inst [get_cells -quiet -hier -filter {(ORIG_REF_NAME == sync_reset || REF_NAME == sync_reset)}] {
     puts "Inserting timing constraints for sync_reset instance $inst"
 
     # reset synchronization

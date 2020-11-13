@@ -279,7 +279,7 @@ always @(posedge s_clk or posedge async_rst) begin
         s_rst_sync3_reg <= 1'b1;
     end else begin
         s_rst_sync1_reg <= 1'b0;
-        s_rst_sync2_reg <= s_rst_sync1_reg || m_rst_sync1_reg;
+        s_rst_sync2_reg <= s_rst_sync1_reg;
         s_rst_sync3_reg <= s_rst_sync2_reg;
     end
 end
@@ -291,7 +291,7 @@ always @(posedge m_clk or posedge async_rst) begin
         m_rst_sync3_reg <= 1'b1;
     end else begin
         m_rst_sync1_reg <= 1'b0;
-        m_rst_sync2_reg <= s_rst_sync1_reg || m_rst_sync1_reg;
+        m_rst_sync2_reg <= m_rst_sync1_reg;
         m_rst_sync3_reg <= m_rst_sync2_reg;
     end
 end
