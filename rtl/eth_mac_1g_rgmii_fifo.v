@@ -214,15 +214,17 @@ end
 
 wire [1:0] speed_int;
 
-reg [1:0] speed_sync_reg_1 = 2'b10;
-reg [1:0] speed_sync_reg_2 = 2'b10;
-
-assign speed = speed_sync_reg_2;
-
-always @(posedge logic_clk) begin
-    speed_sync_reg_1 <= speed_int;
-    speed_sync_reg_2 <= speed_sync_reg_1;
-end
+xclock_vec_on_change #(
+    .WIDTH  ( 2 )
+) sync_speed_inst (
+    .in_clk             ( gtx_clk   ),
+    .in_rst             ( gtx_rst   ),
+    .in_vec             ( speed_int ),
+    .out_clk            ( logic_clk ),
+    .out_rst            (           ),
+    .out_vec            ( speed     ),
+    .out_changed_stb    (           )
+);
 
 wire logic_rst_rx_clk;
 
