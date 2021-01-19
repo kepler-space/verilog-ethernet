@@ -438,6 +438,18 @@ generate
             .m_status_bad_frame(rx_fifo_bad_frame),
             .m_status_good_frame(rx_fifo_good_frame)
         );
+
+        // Tie off unused outputs
+        assign ext_rx_fifo_clk          = 1'b0;
+        assign ext_rx_fifo_out_tdata    = {AXIS_DATA_WIDTH{1'bX}};
+        assign ext_rx_fifo_out_tvalid   = 1'b0;
+        assign ext_rx_fifo_out_tlast    = 1'b0;
+        assign ext_rx_fifo_out_tuser    = 1'b0;
+        assign ext_rx_fifo_in_tready    = 1'b0;
+        always @(posedge rx_clk) begin
+            ext_rx_fifo_rst <= 1'b0;
+        end
+
     end
 endgenerate
 
