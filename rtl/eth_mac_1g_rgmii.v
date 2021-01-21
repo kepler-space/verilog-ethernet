@@ -238,6 +238,11 @@ eth_mac_1g_inst (
     .gmii_txd(mac_gmii_txd),
     .gmii_tx_en(mac_gmii_tx_en),
     .gmii_tx_er(mac_gmii_tx_er),
+    .tx_ptp_ts(96'h0),
+    .rx_ptp_ts(96'h0),
+    .tx_axis_ptp_ts(),
+    .tx_axis_ptp_ts_tag(),
+    .tx_axis_ptp_ts_valid(),
     .rx_clk_enable(1'b1),
     .tx_clk_enable(mac_gmii_tx_clk_en),
     .rx_mii_select(rx_mii_select_sync[1]),
@@ -245,7 +250,9 @@ eth_mac_1g_inst (
     .tx_error_underflow(tx_error_underflow),
     .rx_error_bad_frame(rx_error_bad_frame),
     .rx_error_bad_fcs(rx_error_bad_fcs),
-    .ifg_delay(ifg_delay)
+    .ifg_delay(ifg_delay),
+    .tx_start_packet(),
+    .rx_start_packet()
 );
 
 endmodule
