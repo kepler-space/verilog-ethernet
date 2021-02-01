@@ -31,7 +31,7 @@ THE SOFTWARE.
  */
 module rgmii_phy_if #
 (
-    parameter integer DEVICE_TYPE = 0, // 0 for 7Series, 2 for Ultrascale+
+    parameter integer NO_BUFG = 0, // Set to 1 to avoid inserting a BUFG for the RX clock
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // IODDR style ("IODDR", "IODDR2")
@@ -88,8 +88,7 @@ wire rgmii_rx_ctl_1;
 wire rgmii_rx_ctl_2;
 
 generate
-    // We need to use some hacks if DEVICE_TYPE is 2
-    if(DEVICE_TYPE == 2) begin
+    if (NO_BUFG) begin
         // We remove the BUFG since we use a non-clock capable pin for phy_rgmii_rx_clk
         ssio_ddr_in_nobufg #(
             .TARGET           (TARGET           ),

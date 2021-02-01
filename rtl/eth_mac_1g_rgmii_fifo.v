@@ -31,7 +31,7 @@ THE SOFTWARE.
  */
 module eth_mac_1g_rgmii_fifo #
 (
-    parameter integer DEVICE_TYPE = 0, // 0 for 7Series, 2 for Ultrascale+
+    parameter integer NO_BUFG = 0, // Set to 1 to avoid inserting a BUFG for the RX clock
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // IODDR style ("IODDR", "IODDR2")
@@ -229,7 +229,7 @@ xclock_vec_on_change #(
 wire logic_rst_rx_clk;
 
 eth_mac_1g_rgmii #(
-    .DEVICE_TYPE(DEVICE_TYPE),
+    .NO_BUFG(NO_BUFG),
     .TARGET(TARGET),
     .IODDR_STYLE(IODDR_STYLE),
     .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
