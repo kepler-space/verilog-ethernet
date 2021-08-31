@@ -37,7 +37,7 @@ module udp_checksum_gen #
 (
     input  wire        clk,
     input  wire        rst,
-    
+
     /*
      * UDP frame input
      */
@@ -64,7 +64,7 @@ module udp_checksum_gen #
     output wire        s_udp_payload_axis_tready,
     input  wire        s_udp_payload_axis_tlast,
     input  wire        s_udp_payload_axis_tuser,
-    
+
     /*
      * UDP frame output
      */
@@ -95,7 +95,7 @@ module udp_checksum_gen #
     input  wire        m_udp_payload_axis_tready,
     output wire        m_udp_payload_axis_tlast,
     output wire        m_udp_payload_axis_tuser,
-    
+
     /*
      * Status signals
      */
@@ -234,7 +234,9 @@ payload_fifo (
     .status_overflow(),
     .status_bad_frame(),
     .status_good_frame(),
-    .reset_read_ptr(1'b0)
+    // Unused
+    .reset_read_ptr(1'b0),
+    .fill_level()
 );
 
 assign s_udp_payload_fifo_tdata = s_udp_payload_axis_tdata;
