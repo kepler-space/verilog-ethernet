@@ -57,7 +57,7 @@ initial begin
     end
 end
 
-localparam COUNT_WIDTH = $clog2(COUNT_125US);
+localparam COUNT_WIDTH = $clog2($rtoi(COUNT_125US)+1);
 
 localparam [1:0]
     SYNC_DATA = 2'b10,
