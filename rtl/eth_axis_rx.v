@@ -75,11 +75,11 @@ module eth_axis_rx #
     output wire                  error_header_early_termination
 );
 
-parameter CYCLE_COUNT = (14+KEEP_WIDTH-1)/KEEP_WIDTH;
+localparam CYCLE_COUNT = (14+KEEP_WIDTH-1)/KEEP_WIDTH;
 
-parameter PTR_WIDTH = $clog2(CYCLE_COUNT);
+localparam PTR_WIDTH = $clog2(CYCLE_COUNT);
 
-parameter OFFSET = 14 % KEEP_WIDTH;
+localparam OFFSET = 14 % KEEP_WIDTH;
 
 // bus width assertions
 initial begin
@@ -342,7 +342,7 @@ always @* begin
     store_eth_payload_int_to_output = 1'b0;
     store_eth_payload_int_to_temp = 1'b0;
     store_eth_payload_axis_temp_to_output = 1'b0;
-    
+
     if (m_eth_payload_axis_tready_int_reg) begin
         // input is ready
         if (m_eth_payload_axis_tready || !m_eth_payload_axis_tvalid_reg) begin

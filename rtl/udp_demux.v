@@ -122,7 +122,7 @@ module udp_demux #
     input  wire [$clog2(M_COUNT)-1:0]    select
 );
 
-parameter CL_M_COUNT = $clog2(M_COUNT);
+localparam CL_M_COUNT = $clog2(M_COUNT);
 
 reg [CL_M_COUNT-1:0] select_reg = {CL_M_COUNT{1'b0}}, select_ctl, select_next;
 reg drop_reg = 1'b0, drop_ctl, drop_next;
@@ -280,7 +280,7 @@ always @* begin
     m_udp_payload_axis_tlast_int  = s_udp_payload_axis_tlast;
     m_udp_payload_axis_tid_int    = s_udp_payload_axis_tid;
     m_udp_payload_axis_tdest_int  = s_udp_payload_axis_tdest;
-    m_udp_payload_axis_tuser_int  = s_udp_payload_axis_tuser; 
+    m_udp_payload_axis_tuser_int  = s_udp_payload_axis_tuser;
 end
 
 always @(posedge clk) begin

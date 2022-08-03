@@ -60,7 +60,7 @@ next state computation, shifting DATA_WIDTH bits per pass through the module.  I
 is XORed with LFSR feedback path, tie data_in to zero if this is not required.
 
 Works in two parts: statically computes a set of bit masks, then uses these bit masks to
-select bits for XORing to compute the next state.  
+select bits for XORing to compute the next state.
 
 Ports:
 
@@ -161,7 +161,7 @@ DATA_WIDTH
 
 Specify width of input and output data bus.  The module will perform one shift per input
 data bit, so if the input data bus is not required tie data_in to zero and set DATA_WIDTH
-to the required number of shifts per clock cycle.  
+to the required number of shifts per clock cycle.
 
 STYLE
 
@@ -360,10 +360,10 @@ end
 
 `ifdef SIMULATION
 // "AUTO" style is "REDUCTION" for faster simulation
-parameter STYLE_INT = (STYLE == "AUTO") ? "REDUCTION" : STYLE;
+localparam STYLE_INT = (STYLE == "AUTO") ? "REDUCTION" : STYLE;
 `else
 // "AUTO" style is "LOOP" for better synthesis result
-parameter STYLE_INT = (STYLE == "AUTO") ? "LOOP" : STYLE;
+localparam STYLE_INT = (STYLE == "AUTO") ? "LOOP" : STYLE;
 `endif
 
 genvar n;
