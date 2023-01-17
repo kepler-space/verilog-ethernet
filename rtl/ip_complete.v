@@ -33,7 +33,8 @@ module ip_complete #(
     parameter ARP_CACHE_ADDR_WIDTH = 9,
     parameter ARP_REQUEST_RETRY_COUNT = 4,
     parameter ARP_REQUEST_RETRY_INTERVAL = 125000000*2,
-    parameter ARP_REQUEST_TIMEOUT = 125000000*30
+    parameter ARP_REQUEST_TIMEOUT = 125000000*30,
+    parameter TX_DONT_FRAGMENT = 1
 )
 (
     input  wire        clk,
@@ -300,7 +301,9 @@ eth_arb_mux_inst (
 /*
  * IP module
  */
-ip
+ip #(
+    .TX_DONT_FRAGMENT ( TX_DONT_FRAGMENT )
+)
 ip_inst (
     .clk(clk),
     .rst(rst),

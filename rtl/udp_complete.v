@@ -36,12 +36,13 @@ module udp_complete #(
     parameter ARP_REQUEST_TIMEOUT = 125000000*30,
     parameter UDP_CHECKSUM_GEN_ENABLE = 1,
     parameter UDP_CHECKSUM_PAYLOAD_FIFO_DEPTH = 2048,
-    parameter UDP_CHECKSUM_HEADER_FIFO_DEPTH = 8
+    parameter UDP_CHECKSUM_HEADER_FIFO_DEPTH = 8,
+    parameter TX_DONT_FRAGMENT = 1
 )
 (
     input  wire        clk,
     input  wire        rst,
-    
+
     /*
      * Ethernet frame input
      */
@@ -55,7 +56,7 @@ module udp_complete #(
     output wire        s_eth_payload_axis_tready,
     input  wire        s_eth_payload_axis_tlast,
     input  wire        s_eth_payload_axis_tuser,
-    
+
     /*
      * Ethernet frame output
      */
@@ -69,7 +70,7 @@ module udp_complete #(
     input  wire        m_eth_payload_axis_tready,
     output wire        m_eth_payload_axis_tlast,
     output wire        m_eth_payload_axis_tuser,
-    
+
     /*
      * IP input
      */
@@ -87,7 +88,7 @@ module udp_complete #(
     output wire        s_ip_payload_axis_tready,
     input  wire        s_ip_payload_axis_tlast,
     input  wire        s_ip_payload_axis_tuser,
-    
+
     /*
      * IP output
      */
@@ -114,7 +115,7 @@ module udp_complete #(
     input  wire        m_ip_payload_axis_tready,
     output wire        m_ip_payload_axis_tlast,
     output wire        m_ip_payload_axis_tuser,
-    
+
     /*
      * UDP input
      */
@@ -134,7 +135,7 @@ module udp_complete #(
     output wire        s_udp_payload_axis_tready,
     input  wire        s_udp_payload_axis_tlast,
     input  wire        s_udp_payload_axis_tuser,
-    
+
     /*
      * UDP output
      */
@@ -430,7 +431,8 @@ ip_complete #(
     .ARP_CACHE_ADDR_WIDTH(ARP_CACHE_ADDR_WIDTH),
     .ARP_REQUEST_RETRY_COUNT(ARP_REQUEST_RETRY_COUNT),
     .ARP_REQUEST_RETRY_INTERVAL(ARP_REQUEST_RETRY_INTERVAL),
-    .ARP_REQUEST_TIMEOUT(ARP_REQUEST_TIMEOUT)
+    .ARP_REQUEST_TIMEOUT(ARP_REQUEST_TIMEOUT),
+    .TX_DONT_FRAGMENT(TX_DONT_FRAGMENT)
 )
 ip_complete_inst (
     .clk(clk),

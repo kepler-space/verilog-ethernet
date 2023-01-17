@@ -29,8 +29,9 @@ THE SOFTWARE.
 /*
  * IPv4 block, ethernet frame interface
  */
-module ip
-(
+module ip #(
+    parameter TX_DONT_FRAGMENT = 1
+) (
     input  wire        clk,
     input  wire        rst,
 
@@ -213,7 +214,7 @@ ip_eth_tx_inst (
     .s_ip_ecn(s_ip_ecn),
     .s_ip_length(s_ip_length),
     .s_ip_identification(16'd0),
-    .s_ip_flags(3'b010),
+    .s_ip_flags({1'b0, TX_DONT_FRAGMENT[0], 1'b0}),
     .s_ip_fragment_offset(13'd0),
     .s_ip_ttl(s_ip_ttl),
     .s_ip_protocol(s_ip_protocol),
