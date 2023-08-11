@@ -208,7 +208,7 @@ localparam integer MAX_WIDTH = LFSR_WIDTH > DATA_WIDTH ? LFSR_WIDTH : DATA_WIDTH
 
 integer i, j;
 
-function automatic [4*MAX_WIDTH*MAX_WIDTH:0] generate_masks;
+function automatic [4*MAX_WIDTH*MAX_WIDTH-1:0] generate_masks;
     input integer dummy;
     integer i, j;
     reg [LFSR_WIDTH-1:0] state_val;
@@ -359,37 +359,40 @@ begin
             output_mask_data_i[i] = data_val;
         end
     end
-
     for (i = 0; i < LFSR_WIDTH; i = i + 1) begin
-        generate_masks[0 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH] = lfsr_mask_state_i[i];
-        generate_masks[1 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH] = lfsr_mask_data_i[i];
+        generate_masks[MAX_WIDTH * (0 * MAX_WIDTH + i) +: MAX_WIDTH] = lfsr_mask_state_i[i];
+        generate_masks[MAX_WIDTH * (1 * MAX_WIDTH + i) +: MAX_WIDTH] = lfsr_mask_data_i[i];
     end
 
     for (i = 0; i < DATA_WIDTH; i = i + 1) begin
-        generate_masks[2 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH] = output_mask_state_i[i];
-        generate_masks[3 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH] = output_mask_data_i[i];
+        generate_masks[MAX_WIDTH * (2 * MAX_WIDTH + i) +: MAX_WIDTH] = output_mask_state_i[i];
+        generate_masks[MAX_WIDTH * (3 * MAX_WIDTH + i) +: MAX_WIDTH] = output_mask_data_i[i];
     end
 end
 endfunction
 
-reg [4*MAX_WIDTH*MAX_WIDTH:0] generated_masks = generate_masks(1);
+reg [4*MAX_WIDTH*MAX_WIDTH-1:0] generated_masks = generate_masks(1);
+
+reg [LFSR_WIDTH-1:0] lfsr_mask_state_c[LFSR_WIDTH-1:0];
+reg [DATA_WIDTH-1:0] lfsr_mask_data_c[LFSR_WIDTH-1:0];
+reg [LFSR_WIDTH-1:0] output_mask_state_c[DATA_WIDTH-1:0];
+reg [DATA_WIDTH-1:0] output_mask_data_c[DATA_WIDTH-1:0];
+
 
 initial begin
     for (i = 0; i < LFSR_WIDTH; i = i + 1) begin
-        lfsr_mask_state[i] = generated_masks[0 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH];
-        lfsr_mask_data[i] = generated_masks[1 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH];
+        lfsr_mask_state[i] = generated_masks[MAX_WIDTH * (0 * MAX_WIDTH + i) +: MAX_WIDTH];
+        lfsr_mask_data[i]  = generated_masks[MAX_WIDTH * (1 * MAX_WIDTH + i) +: MAX_WIDTH];
     end
 
-    for (i = 0; i < LFSR_WIDTH; i = i + 1) begin
-        output_mask_data[i] = generated_masks[3 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH];
-        output_mask_state[i] = generated_masks[2 * MAX_WIDTH * MAX_WIDTH + (i+1) * MAX_WIDTH -: MAX_WIDTH];
+    for (i = 0; i < DATA_WIDTH; i = i + 1) begin
+        output_mask_state[i] = generated_masks[MAX_WIDTH * (2 * MAX_WIDTH + i) +: MAX_WIDTH];
+        output_mask_data[i]  = generated_masks[MAX_WIDTH * (3 * MAX_WIDTH + i) +: MAX_WIDTH];
     end
-
     // for (i = 0; i < LFSR_WIDTH; i = i + 1) begin
     //     $display("%d %b %b", i, lfsr_mask_state[i], lfsr_mask_data[i]);
     // end
 end
-
 
 
 // synthesis translate_off
