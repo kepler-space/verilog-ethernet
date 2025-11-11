@@ -404,7 +404,7 @@ end
 localparam STYLE_INT = (STYLE == "AUTO") ? "REDUCTION" : STYLE;
 `else
 // "AUTO" style is "LOOP" for better synthesis result
-localparam STYLE_INT = (STYLE == "AUTO") ? "LOOP" : STYLE;
+localparam STYLE_INT = (STYLE == "AUTO") ? "LOOP_2025" : STYLE;
 `endif
 
 genvar n;
@@ -468,6 +468,33 @@ generate
                 end
             end
         end
+
+    end else if (STYLE_INT == "LOOP_2025") begin
+
+        // Vivado 2025 synthesis crashes with either of the above options.
+        // This is a refactor of "LOOP" that works with it.
+        wire [LFSR_WIDTH-1:0] state_out_a_reg;
+        wire [LFSR_WIDTH-1:0] state_out_b_reg;
+        wire [LFSR_WIDTH-1:0] state_out_reg;
+
+        wire [DATA_WIDTH-1:0] data_out_a_reg;
+        wire [DATA_WIDTH-1:0] data_out_b_reg;
+        wire [DATA_WIDTH-1:0] data_out_reg;
+
+        assign state_out = state_out_reg;
+        assign data_out = data_out_reg;
+
+        for (genvar k = 0; k < LFSR_WIDTH; k = k + 1) begin
+            assign state_out_a_reg[k] = ^(lfsr_mask_state[k] & state_in);
+            assign state_out_b_reg[k] = ^(lfsr_mask_data[k]  & data_in);
+        end
+        assign state_out_reg = state_out_a_reg ^ state_out_b_reg;
+
+        for (genvar k = 0; k < DATA_WIDTH; k = k + 1) begin
+            assign data_out_a_reg[k] = ^(output_mask_state[k] & state_in);
+            assign data_out_b_reg[k] = ^(output_mask_data[k] & data_in);
+        end
+        assign data_out_reg = data_out_a_reg ^ data_out_b_reg;
 
     end else begin
 
